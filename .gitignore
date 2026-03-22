@@ -1,0 +1,8 @@
+.claude/worktrees/
+.claude/plans/
+.claude/memory/
+.claude/settings.local.json
+.env
+.env.*
+node_modules/
+.DS_Store
