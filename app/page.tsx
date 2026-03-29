@@ -84,7 +84,7 @@ export default function Home() {
         {showUpload && !pendingText ? (
           <div className="flex flex-col flex-1">
             {/* Top ad on upload screen */}
-            <AdBanner format="horizontal" slot="1234567890" className="bg-[#eae6df] pt-4 px-4" />
+            <AdBanner format="horizontal" slot="7984254267" className="bg-[#eae6df] pt-4 px-4" />
             <FileUpload onFileLoaded={handleFileLoaded} />
             <div className="bg-[#eae6df] pb-4 text-center">
               <button
@@ -95,7 +95,7 @@ export default function Home() {
               </button>
             </div>
             {/* Bottom ad on upload screen */}
-            <AdBanner format="horizontal" slot="1234567891" className="bg-[#eae6df] pb-4 px-4" />
+            <AdBanner format="horizontal" slot="7984254267" className="bg-[#eae6df] pb-4 px-4" />
             {/* Footer links */}
             <div className="bg-[#eae6df] pb-6 text-center flex justify-center gap-4">
               <a href="/privacy" className="text-xs text-[#667781] hover:text-[#00a884] hover:underline">Privacy Policy</a>

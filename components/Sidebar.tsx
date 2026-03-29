@@ -85,7 +85,7 @@ export default function Sidebar({ chat }: SidebarProps) {
 
       {/* Sidebar ad */}
       <div className="px-3 py-4 border-t border-[#e9edef] shrink-0">
-        <AdBanner format="rectangle" slot="1234567893" />
+        <AdBanner format="rectangle" slot="6671172592" />
       </div>
     </aside>
   );

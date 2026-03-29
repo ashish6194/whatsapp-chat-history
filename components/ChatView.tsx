@@ -150,7 +150,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
         )}
 
         {/* Ad below header */}
-        <AdBanner format="horizontal" slot="1234567892" className="bg-[#eae6df] shrink-0" />
+        <AdBanner format="horizontal" slot="7984254267" className="bg-[#eae6df] shrink-0" />
 
         {/* Messages */}
         <div
