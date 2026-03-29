@@ -96,6 +96,12 @@ export default function Home() {
             </div>
             {/* Bottom ad on upload screen */}
             <AdBanner format="horizontal" slot="1234567891" className="bg-[#eae6df] pb-4 px-4" />
+            {/* Footer links */}
+            <div className="bg-[#eae6df] pb-6 text-center flex justify-center gap-4">
+              <a href="/privacy" className="text-xs text-[#667781] hover:text-[#00a884] hover:underline">Privacy Policy</a>
+              <span className="text-xs text-[#667781]">&middot;</span>
+              <a href="/terms" className="text-xs text-[#667781] hover:text-[#00a884] hover:underline">Terms of Service</a>
+            </div>
           </div>
         ) : chat ? (
           <ErrorBoundary onReset={handleUploadClick}>
