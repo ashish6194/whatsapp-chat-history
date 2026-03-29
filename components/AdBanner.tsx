@@ -39,40 +39,26 @@ export default function AdBanner({ format = 'horizontal', className = '', slot }
   }, []);
 
   const styles = formatStyles[format];
-  const isPlaceholder = ADSENSE_PUB_ID === 'ca-pub-XXXXXXXXXXXXXXXX';
 
   return (
     <div
       className={`flex items-center justify-center overflow-hidden ${className}`}
       style={{ minHeight: styles.height }}
     >
-      {isPlaceholder ? (
-        // Placeholder shown until real AdSense ID is configured
-        <div
-          className="flex items-center justify-center bg-gradient-to-r from-[#f0f2f5] to-[#e9edef] border border-dashed border-[#c4ccd5] rounded-lg text-[#667781] text-xs"
-          style={{ width: styles.width, height: styles.height, maxWidth: '100%' }}
-        >
-          <div className="text-center px-2">
-            <p className="font-medium">Ad Space</p>
-            <p className="opacity-60 mt-0.5">Google AdSense</p>
-          </div>
-        </div>
-      ) : (
-        <ins
-          ref={adRef}
-          className="adsbygoogle"
-          style={{
-            display: 'block',
-            width: styles.width,
-            height: styles.height,
-            maxWidth: '100%',
-          }}
-          data-ad-client={ADSENSE_PUB_ID}
-          data-ad-slot={slot}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
-      )}
+      <ins
+        ref={adRef}
+        className="adsbygoogle"
+        style={{
+          display: 'block',
+          width: styles.width,
+          height: styles.height,
+          maxWidth: '100%',
+        }}
+        data-ad-client={ADSENSE_PUB_ID}
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
     </div>
   );
 }
