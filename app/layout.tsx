@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "WhatsApp Chat Viewer",
   description: "View your exported WhatsApp chat history",
   robots: "index, follow",
+  other: {
+    "google-adsense-account": "ca-pub-1021154314438944",
+  },
 };
 
 export const viewport: Viewport = {
