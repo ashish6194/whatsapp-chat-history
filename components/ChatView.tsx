@@ -9,6 +9,7 @@ import ChatBubble from './ChatBubble';
 import DateSeparator from './DateSeparator';
 import SearchBar from './SearchBar';
 import Sidebar from './Sidebar';
+import AdBanner from './AdBanner';
 
 interface ChatViewProps {
   chat: Chat;
@@ -147,6 +148,9 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
             }}
           />
         )}
+
+        {/* Ad below header */}
+        <AdBanner format="horizontal" slot="1234567892" className="bg-[#eae6df] shrink-0" />
 
         {/* Messages */}
         <div

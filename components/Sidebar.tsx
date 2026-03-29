@@ -2,6 +2,7 @@
 
 import { Chat } from '@/lib/types';
 import { getInitials, getParticipantColor } from '@/lib/utils';
+import AdBanner from './AdBanner';
 
 interface SidebarProps {
   chat: Chat;
@@ -80,6 +81,11 @@ export default function Sidebar({ chat }: SidebarProps) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Sidebar ad */}
+      <div className="px-3 py-4 border-t border-[#e9edef] shrink-0">
+        <AdBanner format="rectangle" slot="1234567893" />
       </div>
     </aside>
   );

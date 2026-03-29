@@ -9,6 +9,7 @@ import ChatView from '@/components/ChatView';
 import FileUpload from '@/components/FileUpload';
 import SenderPicker from '@/components/SenderPicker';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import AdBanner from '@/components/AdBanner';
 
 export default function Home() {
   const [chat, setChat] = useState<Chat | null>(null);
@@ -82,8 +83,10 @@ export default function Home() {
       <div className="flex-1 flex flex-col md:relative md:-mt-[87px] md:mx-auto md:w-full md:max-w-[1600px] md:shadow-2xl md:rounded-t-sm overflow-hidden min-h-0">
         {showUpload && !pendingText ? (
           <div className="flex flex-col flex-1">
+            {/* Top ad on upload screen */}
+            <AdBanner format="horizontal" slot="1234567890" className="bg-[#eae6df] pt-4 px-4" />
             <FileUpload onFileLoaded={handleFileLoaded} />
-            <div className="bg-[#eae6df] pb-8 text-center">
+            <div className="bg-[#eae6df] pb-4 text-center">
               <button
                 onClick={loadSampleData}
                 className="text-sm text-[#00a884] hover:underline font-medium"
@@ -91,6 +94,8 @@ export default function Home() {
                 Or load sample chat data to explore
               </button>
             </div>
+            {/* Bottom ad on upload screen */}
+            <AdBanner format="horizontal" slot="1234567891" className="bg-[#eae6df] pb-4 px-4" />
           </div>
         ) : chat ? (
           <ErrorBoundary onReset={handleUploadClick}>

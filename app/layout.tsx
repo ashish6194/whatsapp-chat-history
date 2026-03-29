@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "WhatsApp Chat Viewer",
   description: "View your exported WhatsApp chat history",
-  robots: "noindex, nofollow",
+  robots: "index, follow",
 };
 
 export const viewport: Viewport = {
@@ -35,7 +35,15 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1021154314438944"
+          crossOrigin="anonymous"
+        />
+      </body>
     </html>
   );
 }
