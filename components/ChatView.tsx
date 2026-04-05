@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo, useCallback, createContext, useCo
 import { List, useListRef, type RowComponentProps } from 'react-window';
 import { Chat, FilterState, Message } from '@/lib/types';
 import { filterMessages, isSameDay } from '@/lib/utils';
+import { exportChatToPDF } from '@/lib/pdf-export';
 import ChatHeader from './ChatHeader';
 import ChatBubble from './ChatBubble';
 import DateSeparator from './DateSeparator';
@@ -86,6 +87,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
     dateFrom: null,
     dateTo: null,
   });
+  const [exporting, setExporting] = useState(false);
   const listRef = useListRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(600);
@@ -124,6 +126,21 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
     [rows]
   );
 
+  const handleExportPDF = useCallback(() => {
+    setExporting(true);
+    // Use setTimeout to let the UI update with the spinner before heavy work
+    setTimeout(() => {
+      try {
+        const hasFilters = filters.searchQuery || filters.selectedSender || filters.dateFrom || filters.dateTo;
+        exportChatToPDF(chat, hasFilters ? { messages: filtered } : undefined);
+      } catch {
+        alert('Failed to generate PDF. Please try again.');
+      } finally {
+        setExporting(false);
+      }
+    }, 50);
+  }, [chat, filtered, filters]);
+
   return (
     <div className="flex flex-1 min-h-0" role="main">
       {/* Main chat area */}
@@ -133,6 +150,8 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
           onSearchToggle={() => setSearchOpen(!searchOpen)}
           onUploadClick={onUploadClick}
           searchOpen={searchOpen}
+          onExportPDF={handleExportPDF}
+          exporting={exporting}
         />
 
         {searchOpen && (
