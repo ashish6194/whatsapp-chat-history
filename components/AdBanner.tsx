@@ -18,7 +18,7 @@ declare global {
   }
 }
 
-export default function AdBanner({ format = 'horizontal', className = '', slot }: AdBannerProps) {
+export default function AdBanner({ className = '', slot }: AdBannerProps) {
   const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
   const [adLoaded, setAdLoaded] = useState(false);

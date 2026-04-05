@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — WhatsApp Chat Viewer',
@@ -9,7 +10,7 @@ export default function PrivacyPolicy() {
     <main className="min-h-screen bg-[#eae6df]">
       <div className="bg-[#075e54] text-white px-6 py-4">
         <div className="max-w-3xl mx-auto">
-          <a href="/" className="text-white/80 text-sm hover:text-white">&larr; Back to Chat Viewer</a>
+          <Link href="/" className="text-white/80 text-sm hover:text-white">&larr; Back to Chat Viewer</Link>
           <h1 className="text-2xl font-semibold mt-2">Privacy Policy</h1>
           <p className="text-white/70 text-sm mt-1">Last updated: March 29, 2025</p>
         </div>
