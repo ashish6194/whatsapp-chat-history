@@ -11,6 +11,7 @@ import DateSeparator from './DateSeparator';
 import SearchBar from './SearchBar';
 import Sidebar from './Sidebar';
 import AdBanner from './AdBanner';
+import ChatStats from './ChatStats';
 
 interface ChatViewProps {
   chat: Chat;
@@ -88,6 +89,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
     dateTo: null,
   });
   const [exporting, setExporting] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   const listRef = useListRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(600);
@@ -152,6 +154,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
           searchOpen={searchOpen}
           onExportPDF={handleExportPDF}
           exporting={exporting}
+          onStatsToggle={() => setStatsOpen(true)}
         />
 
         {searchOpen && (
@@ -206,6 +209,9 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
 
       {/* Desktop sidebar */}
       <Sidebar chat={chat} />
+
+      {/* Stats modal */}
+      {statsOpen && <ChatStats chat={chat} onClose={() => setStatsOpen(false)} />}
     </div>
   );
 }
