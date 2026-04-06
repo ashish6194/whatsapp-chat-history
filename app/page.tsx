@@ -9,6 +9,7 @@ import ChatView from '@/components/ChatView';
 import FileUpload from '@/components/FileUpload';
 import SenderPicker from '@/components/SenderPicker';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   const [chat, setChat] = useState<Chat | null>(null);
@@ -74,14 +75,14 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col h-screen bg-[#111b21]">
+    <main className="flex flex-col h-screen bg-[var(--wa-page-bg)]">
       {/* Top bar (desktop only) */}
-      <div className="hidden md:block h-[127px] bg-[#00a884] shrink-0" />
+      <div className="hidden md:block h-[127px] bg-[var(--wa-top-bar)] shrink-0" />
 
       {/* Main container */}
       <div className="flex-1 flex flex-col md:relative md:-mt-[87px] md:mx-auto md:w-full md:max-w-[1600px] md:shadow-2xl md:rounded-t-sm overflow-hidden min-h-0">
         {showUpload && !pendingText ? (
-          <div className="flex flex-col flex-1 bg-[#eae6df] overflow-y-auto">
+          <div className="flex flex-col flex-1 bg-[var(--wa-bg)] overflow-y-auto">
             <FileUpload onFileLoaded={handleFileLoaded} />
             <div className="pb-4 text-center">
               <button
@@ -155,6 +156,8 @@ export default function Home() {
       {pendingText && pendingParticipants.length > 0 && (
         <SenderPicker participants={pendingParticipants} onSelect={handleSenderSelected} />
       )}
+
+      <ThemeToggle />
     </main>
   );
 }

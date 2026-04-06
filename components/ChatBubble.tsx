@@ -34,16 +34,16 @@ const ChatBubble = memo(function ChatBubble({ message, isGroup, participants, sh
             : 'max-w-[75%] md:max-w-[65%] px-2 py-1'
         } ${
           isOut
-            ? 'bg-[#d9fdd3] rounded-tr-none'
-            : 'bg-white rounded-tl-none'
+            ? 'bg-[var(--wa-bubble-out)] rounded-tr-none'
+            : 'bg-[var(--wa-bubble-in)] rounded-tl-none'
         }`}
       >
         {/* Bubble tail */}
         <div
           className={`absolute top-0 w-2 h-3 ${
             isOut
-              ? '-right-2 text-[#d9fdd3]'
-              : '-left-2 text-white'
+              ? '-right-2 text-[var(--wa-bubble-out)]'
+              : '-left-2 text-[var(--wa-bubble-in)]'
           }`}
         >
           <svg viewBox="0 0 8 13" width="8" height="13" aria-hidden="true">
@@ -74,14 +74,14 @@ const ChatBubble = memo(function ChatBubble({ message, isGroup, participants, sh
           />
         )}
         {message.content && !message.content.startsWith('<Media omitted>') && !message.mediaUrl && (
-          <p className="text-[14.2px] leading-[19px] text-[#111b21] whitespace-pre-wrap break-words">
+          <p className="text-[14.2px] leading-[19px] text-[var(--wa-text-primary)] whitespace-pre-wrap break-words">
             {message.content}
           </p>
         )}
 
         {/* Timestamp + ticks */}
         <div className="flex justify-end items-center gap-1 -mb-0.5 mt-0.5">
-          <span className="text-[11px] text-[#667781] leading-none">
+          <span className="text-[11px] text-[var(--wa-text-secondary)] leading-none">
             {formatTime(message.timestamp)}
           </span>
           {isOut && (

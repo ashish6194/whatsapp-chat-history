@@ -38,7 +38,34 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: `try{const t=localStorage.getItem('theme');const d=t==='dark'||(t==null&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}` }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "WhatsApp Chat Viewer",
+              "url": "https://whatspp-chat-one.vercel.app",
+              "description": "View, search, analyze, and export your WhatsApp chat history. Upload .txt or .zip exports and browse messages with media, bookmarks, analytics, and PDF export.",
+              "applicationCategory": "UtilitiesApplication",
+              "operatingSystem": "Any",
+              "browserRequirements": "Requires a modern web browser",
+              "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+              "featureList": [
+                "WhatsApp-style chat viewer",
+                "Search and filter messages",
+                "Media display from .zip exports",
+                "PDF export",
+                "Chat analytics and statistics",
+                "Message bookmarks",
+                "Dark mode",
+                "100% client-side processing"
+              ],
+            }),
+          }}
+        />
         {children}
         {/* Google AdSense */}
         <script

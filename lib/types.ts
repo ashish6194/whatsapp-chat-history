@@ -25,4 +25,6 @@ export interface FilterState {
   selectedSender: string | null;
   dateFrom: string | null;
   dateTo: string | null;
+  mediaOnly: boolean;
+  hideSystemMessages: boolean;
 }

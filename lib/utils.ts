@@ -56,6 +56,10 @@ export function filterMessages(messages: Message[], filters: FilterState): Messa
       if (msg.timestamp > to) return false;
     }
 
+    if (filters.mediaOnly && msg.type !== 'media') return false;
+
+    if (filters.hideSystemMessages && msg.type === 'system') return false;
+
     return true;
   });
 }

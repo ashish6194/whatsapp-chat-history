@@ -5,9 +5,52 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* WhatsApp theme colors as CSS variables */
+:root {
+  --wa-bg: #eae6df;
+  --wa-header: #075e54;
+  --wa-header-text: #ffffff;
+  --wa-bubble-out: #d9fdd3;
+  --wa-bubble-in: #ffffff;
+  --wa-bubble-system: rgba(226, 214, 186, 0.6);
+  --wa-text-primary: #111b21;
+  --wa-text-secondary: #667781;
+  --wa-accent: #00a884;
+  --wa-border: #e9edef;
+  --wa-input-bg: #f0f2f5;
+  --wa-sidebar-bg: #ffffff;
+  --wa-page-bg: #111b21;
+  --wa-top-bar: #00a884;
+  --wa-date-sep: rgba(255, 255, 255, 0.9);
+  --wa-search-bg: #ffffff;
+}
+
+.dark {
+  --wa-bg: #0b141a;
+  --wa-header: #1f2c34;
+  --wa-header-text: #e9edef;
+  --wa-bubble-out: #005c4b;
+  --wa-bubble-in: #1f2c34;
+  --wa-bubble-system: rgba(19, 28, 33, 0.8);
+  --wa-text-primary: #e9edef;
+  --wa-text-secondary: #8696a0;
+  --wa-accent: #00a884;
+  --wa-border: #2a3942;
+  --wa-input-bg: #2a3942;
+  --wa-sidebar-bg: #111b21;
+  --wa-page-bg: #0b141a;
+  --wa-top-bar: #1f2c34;
+  --wa-date-sep: rgba(31, 44, 52, 0.9);
+  --wa-search-bg: #1f2c34;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: #cccccc transparent;
+}
+
+.dark * {
+  scrollbar-color: #3b4a54 transparent;
 }
 
 body {
@@ -15,7 +58,7 @@ body {
   overflow: hidden;
 }
 
-/* Hide scrollbar on mobile for cleaner WhatsApp look */
+/* Hide scrollbar on mobile */
 @media (max-width: 768px) {
   * {
     scrollbar-width: none;
@@ -25,7 +68,7 @@ body {
   }
 }
 
-/* Respect reduced motion preference */
+/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

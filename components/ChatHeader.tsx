@@ -15,7 +15,7 @@ interface ChatHeaderProps {
 
 export default function ChatHeader({ chat, onSearchToggle, onUploadClick, searchOpen, onExportPDF, exporting, onStatsToggle }: ChatHeaderProps) {
   return (
-    <header className="bg-[#075e54] text-white flex items-center px-4 py-2 gap-3 shrink-0 md:bg-[#f0f2f5] md:text-[#111b21] md:border-b md:border-[#e9edef]">
+    <header className="bg-[var(--wa-header)] text-[var(--wa-header-text)] flex items-center px-4 py-2 gap-3 shrink-0 md:border-b md:border-[var(--wa-border)]">
       {/* Avatar */}
       <div className="w-10 h-10 rounded-full bg-[#dfe5e7] flex items-center justify-center text-[#075e54] font-semibold text-sm shrink-0 md:bg-[#075e54] md:text-white" aria-hidden="true">
         {getInitials(chat.name)}

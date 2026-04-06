@@ -86,7 +86,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
     searchQuery: '',
     selectedSender: null,
     dateFrom: null,
-    dateTo: null,
+    dateTo: null, mediaOnly: false, hideSystemMessages: false,
   });
   const [exporting, setExporting] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -166,7 +166,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
             totalCount={chat.messages.length}
             onClose={() => {
               setSearchOpen(false);
-              setFilters({ searchQuery: '', selectedSender: null, dateFrom: null, dateTo: null });
+              setFilters({ searchQuery: '', selectedSender: null, dateFrom: null, dateTo: null, mediaOnly: false, hideSystemMessages: false });
             }}
           />
         )}
@@ -177,7 +177,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
         {/* Messages */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-hidden bg-[#eae6df]"
+          className="flex-1 overflow-hidden bg-[var(--wa-bg)]"
           role="log"
           aria-live="polite"
           aria-label="Chat messages"
