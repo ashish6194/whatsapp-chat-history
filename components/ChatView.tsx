@@ -12,10 +12,15 @@ import SearchBar from './SearchBar';
 import Sidebar from './Sidebar';
 import AdBanner from './AdBanner';
 import ChatStats from './ChatStats';
+import BookmarksPanel from './BookmarksPanel';
 
 interface ChatViewProps {
   chat: Chat;
+  bookmarks: Set<string>;
+  onToggleBookmark: (messageId: string) => void;
   onUploadClick: () => void;
+  onBackToList?: () => void;
+  initialSearchQuery?: string | null;
 }
 
 interface RowItem {
@@ -55,12 +60,14 @@ interface RowContextData {
   rows: RowItem[];
   isGroup: boolean;
   participants: string[];
+  bookmarks: Set<string>;
+  onToggleBookmark: (messageId: string) => void;
 }
 
-const RowDataContext = createContext<RowContextData>({ rows: [], isGroup: false, participants: [] });
+const RowDataContext = createContext<RowContextData>({ rows: [], isGroup: false, participants: [], bookmarks: new Set(), onToggleBookmark: () => {} });
 
 function RowRenderer({ index, style }: RowComponentProps) {
-  const { rows, isGroup, participants } = useContext(RowDataContext);
+  const { rows, isGroup, participants, bookmarks, onToggleBookmark } = useContext(RowDataContext);
   const row = rows[index];
   if (!row) return null;
 
@@ -74,20 +81,24 @@ function RowRenderer({ index, style }: RowComponentProps) {
           isGroup={isGroup}
           participants={participants}
           showSender={row.showSender}
+          isBookmarked={bookmarks.has(row.message.id)}
+          onToggleBookmark={() => onToggleBookmark(row.message.id)}
         />
       )}
     </div>
   );
 }
 
-export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    searchQuery: '',
+export default function ChatView({ chat, bookmarks, onToggleBookmark, onUploadClick, onBackToList, initialSearchQuery }: ChatViewProps) {
+  const [searchOpen, setSearchOpen] = useState(!!initialSearchQuery);
+  const [bookmarksOpen, setBookmarksOpen] = useState(false);
+  const [filters, _setFilters] = useState<FilterState>({
+    searchQuery: initialSearchQuery || '',
     selectedSender: null,
     dateFrom: null,
     dateTo: null, mediaOnly: false, hideSystemMessages: false,
   });
+  const setFilters = useCallback((f: FilterState) => { _setFilters(f); }, []);
   const [exporting, setExporting] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const listRef = useListRef(null);
@@ -97,9 +108,16 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
   const filtered = useMemo(() => filterMessages(chat.messages, filters), [chat.messages, filters]);
   const rows = useMemo(() => buildRows(filtered), [filtered]);
 
+  // Message ID -> row index for scroll-to
+  const messageIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    rows.forEach((row, i) => { if (row.type === 'message') map.set(row.message.id, i); });
+    return map;
+  }, [rows]);
+
   const rowContextValue = useMemo(
-    () => ({ rows, isGroup: chat.isGroup, participants: chat.participants }),
-    [rows, chat.isGroup, chat.participants]
+    () => ({ rows, isGroup: chat.isGroup, participants: chat.participants, bookmarks, onToggleBookmark }),
+    [rows, chat.isGroup, chat.participants, bookmarks, onToggleBookmark]
   );
 
   // Measure container height
@@ -128,6 +146,13 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
     [rows]
   );
 
+  const handleScrollToMessage = useCallback((messageId: string) => {
+    const rowIndex = messageIndexMap.get(messageId);
+    if (rowIndex !== undefined && listRef.current) {
+      listRef.current.scrollToRow({ index: rowIndex, align: 'center' });
+    }
+  }, [messageIndexMap, listRef]);
+
   const handleExportPDF = useCallback(() => {
     setExporting(true);
     // Use setTimeout to let the UI update with the spinner before heavy work
@@ -149,12 +174,16 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
       <div className="flex flex-col flex-1 min-w-0">
         <ChatHeader
           chat={chat}
-          onSearchToggle={() => setSearchOpen(!searchOpen)}
+          onSearchToggle={() => { setSearchOpen(!searchOpen); setBookmarksOpen(false); }}
           onUploadClick={onUploadClick}
           searchOpen={searchOpen}
           onExportPDF={handleExportPDF}
           exporting={exporting}
           onStatsToggle={() => setStatsOpen(true)}
+          onBookmarksToggle={() => { setBookmarksOpen(!bookmarksOpen); setSearchOpen(false); }}
+          bookmarksOpen={bookmarksOpen}
+          bookmarkCount={bookmarks.size}
+          onBackToList={onBackToList}
         />
 
         {searchOpen && (
@@ -171,8 +200,18 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
           />
         )}
 
+        {bookmarksOpen && (
+          <BookmarksPanel
+            messages={chat.messages}
+            bookmarks={bookmarks}
+            participants={chat.participants}
+            onScrollTo={handleScrollToMessage}
+            onClose={() => setBookmarksOpen(false)}
+          />
+        )}
+
         {/* Ad below header */}
-        <AdBanner format="horizontal" slot="7984254267" className="bg-[#eae6df] shrink-0" />
+        <AdBanner format="horizontal" slot="7984254267" className="bg-[var(--wa-bg)] shrink-0" />
 
         {/* Messages */}
         <div
@@ -208,7 +247,7 @@ export default function ChatView({ chat, onUploadClick }: ChatViewProps) {
       </div>
 
       {/* Desktop sidebar */}
-      <Sidebar chat={chat} />
+      <Sidebar chat={chat} bookmarkCount={bookmarks.size} />
 
       {/* Stats modal */}
       {statsOpen && <ChatStats chat={chat} onClose={() => setStatsOpen(false)} />}

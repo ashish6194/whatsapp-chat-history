@@ -6,7 +6,7 @@ import { extractWhatsAppZip } from '@/lib/zip-handler';
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 interface FileUploadProps {
-  onFileLoaded: (text: string, mediaMap?: Map<string, string>) => void;
+  onFileLoaded: (text: string, mediaMap?: Map<string, string>, mediaBlobMap?: Map<string, Blob>) => void;
 }
 
 export default function FileUpload({ onFileLoaded }: FileUploadProps) {
@@ -40,13 +40,13 @@ export default function FileUpload({ onFileLoaded }: FileUploadProps) {
       if (isZip) {
         setLoading(true);
         try {
-          const { chatText, mediaMap } = await extractWhatsAppZip(file);
+          const { chatText, mediaMap, mediaBlobMap } = await extractWhatsAppZip(file);
           if (!chatText.trim()) {
             setError('No chat text found in the zip file.');
             setLoading(false);
             return;
           }
-          onFileLoaded(chatText, mediaMap);
+          onFileLoaded(chatText, mediaMap, mediaBlobMap);
         } catch (err) {
           setError(err instanceof Error ? err.message : 'Failed to extract the zip file.');
         } finally {

@@ -1,34 +1,43 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Chat } from '@/lib/types';
+import { Chat, ChatSummary } from '@/lib/types';
 import { parseWhatsAppChat } from '@/lib/parser';
 import { sampleChat } from '@/lib/sample-data';
 import { revokeMediaUrls } from '@/lib/zip-handler';
+import { isDBAvailable, listChats, saveChat, loadChat, deleteChat, saveMediaBlob, getBookmarks, addBookmark, removeBookmark } from '@/lib/db';
 import ChatView from '@/components/ChatView';
-import FileUpload from '@/components/FileUpload';
+import ChatList from '@/components/ChatList';
 import SenderPicker from '@/components/SenderPicker';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   const [chat, setChat] = useState<Chat | null>(null);
-  const [showUpload, setShowUpload] = useState(true);
+  const [storedChats, setStoredChats] = useState<ChatSummary[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  const [dbAvailable, setDbAvailable] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initialSearchQuery, setInitialSearchQuery] = useState<string | null>(null);
+
   const [pendingText, setPendingText] = useState<string | null>(null);
   const [pendingParticipants, setPendingParticipants] = useState<string[]>([]);
   const pendingMediaMapRef = useRef<Map<string, string> | undefined>(undefined);
+  const pendingMediaBlobMapRef = useRef<Map<string, Blob> | undefined>(undefined);
   const activeMediaMapRef = useRef<Map<string, string> | undefined>(undefined);
 
-  // Cleanup object URLs on unmount or chat change
   useEffect(() => {
-    return () => {
-      if (activeMediaMapRef.current) {
-        revokeMediaUrls(activeMediaMapRef.current);
-      }
-    };
+    if (!isDBAvailable()) { setDbAvailable(false); setLoading(false); return; }
+    setDbAvailable(true);
+    listChats().then(setStoredChats).catch(() => setDbAvailable(false)).finally(() => setLoading(false));
   }, []);
 
-  const handleFileLoaded = useCallback((text: string, mediaMap?: Map<string, string>) => {
+  useEffect(() => {
+    return () => { if (activeMediaMapRef.current) revokeMediaUrls(activeMediaMapRef.current); };
+  }, []);
+
+  const handleFileLoaded = useCallback((text: string, mediaMap?: Map<string, string>, mediaBlobMap?: Map<string, Blob>) => {
     const parsed = parseWhatsAppChat(text);
     if (parsed.messages.length === 0) {
       alert('Could not parse any messages from this file. Please check the format.');
@@ -38,121 +47,128 @@ export default function Home() {
     setPendingText(text);
     setPendingParticipants(parsed.participants);
     pendingMediaMapRef.current = mediaMap;
+    pendingMediaBlobMapRef.current = mediaBlobMap;
   }, []);
 
-  const handleSenderSelected = useCallback(
-    (sender: string) => {
-      if (!pendingText) return;
+  const handleSenderSelected = useCallback(async (sender: string) => {
+    if (!pendingText) return;
+    if (activeMediaMapRef.current) revokeMediaUrls(activeMediaMapRef.current);
 
-      // Revoke previous media URLs
-      if (activeMediaMapRef.current) {
-        revokeMediaUrls(activeMediaMapRef.current);
-      }
+    const mediaMap = pendingMediaMapRef.current;
+    const mediaBlobMap = pendingMediaBlobMapRef.current;
+    const parsed = parseWhatsAppChat(pendingText, sender, mediaMap);
 
-      const mediaMap = pendingMediaMapRef.current;
-      const parsed = parseWhatsAppChat(pendingText, sender, mediaMap);
+    let chatId: string | null = null;
+    if (dbAvailable) {
+      try {
+        const first = parsed.messages[0], last = parsed.messages[parsed.messages.length - 1];
+        chatId = await saveChat(pendingText, parsed.name, parsed.participants, parsed.isGroup, sender, parsed.messages.length, first?.timestamp.toISOString() || '', last?.timestamp.toISOString() || '');
+        parsed.id = chatId;
+        if (mediaBlobMap && chatId) {
+          const cid = chatId;
+          for (const [fn, blob] of mediaBlobMap) saveMediaBlob(cid, fn, blob, 'image').catch(() => {});
+        }
+        setStoredChats(await listChats());
+        setBookmarks(await getBookmarks(chatId));
+      } catch { /* persistence failed, chat still works */ }
+    }
+
+    setChat(parsed);
+    setActiveChatId(chatId);
+    setPendingText(null);
+    setPendingParticipants([]);
+    activeMediaMapRef.current = mediaMap;
+    pendingMediaMapRef.current = undefined;
+    pendingMediaBlobMapRef.current = undefined;
+  }, [pendingText, dbAvailable]);
+
+  const handleLoadStoredChat = useCallback(async (chatId: string, searchQuery?: string) => {
+    setLoading(true);
+    try {
+      const result = await loadChat(chatId);
+      if (!result) { setLoading(false); return; }
+      if (activeMediaMapRef.current) revokeMediaUrls(activeMediaMapRef.current);
+      const parsed = parseWhatsAppChat(result.rawText, result.outgoingSender, result.mediaMap);
+      parsed.id = chatId;
+      setBookmarks(await getBookmarks(chatId));
       setChat(parsed);
-      setShowUpload(false);
-      setPendingText(null);
-      setPendingParticipants([]);
-      activeMediaMapRef.current = mediaMap;
-      pendingMediaMapRef.current = undefined;
-    },
-    [pendingText]
-  );
+      setActiveChatId(chatId);
+      setInitialSearchQuery(searchQuery || null);
+      activeMediaMapRef.current = result.mediaMap;
+    } catch { alert('Failed to load chat.'); }
+    finally { setLoading(false); }
+  }, []);
+
+  const handleDeleteChat = useCallback(async (chatId: string) => {
+    try {
+      await deleteChat(chatId);
+      setStoredChats(await listChats());
+      if (activeChatId === chatId) {
+        if (activeMediaMapRef.current) { revokeMediaUrls(activeMediaMapRef.current); activeMediaMapRef.current = undefined; }
+        setChat(null); setActiveChatId(null); setBookmarks(new Set());
+      }
+    } catch { alert('Failed to delete chat.'); }
+  }, [activeChatId]);
 
   const loadSampleData = useCallback(() => {
-    if (activeMediaMapRef.current) {
-      revokeMediaUrls(activeMediaMapRef.current);
-      activeMediaMapRef.current = undefined;
-    }
-    setChat(sampleChat);
-    setShowUpload(false);
+    if (activeMediaMapRef.current) { revokeMediaUrls(activeMediaMapRef.current); activeMediaMapRef.current = undefined; }
+    setChat({ ...sampleChat, id: '__sample__' });
+    setActiveChatId('__sample__');
+    setBookmarks(new Set());
   }, []);
 
-  const handleUploadClick = useCallback(() => {
-    setShowUpload(true);
+  const handleBackToList = useCallback(() => {
+    if (activeMediaMapRef.current) { revokeMediaUrls(activeMediaMapRef.current); activeMediaMapRef.current = undefined; }
+    setChat(null); setActiveChatId(null); setBookmarks(new Set());
   }, []);
+
+  const handleToggleBookmark = useCallback(async (messageId: string) => {
+    if (!activeChatId || activeChatId === '__sample__') {
+      setBookmarks((prev) => { const n = new Set(prev); if (n.has(messageId)) n.delete(messageId); else n.add(messageId); return n; });
+      return;
+    }
+    try {
+      const isB = bookmarks.has(messageId);
+      if (isB) await removeBookmark(activeChatId, messageId); else await addBookmark(activeChatId, messageId);
+      setBookmarks((prev) => { const n = new Set(prev); if (isB) n.delete(messageId); else n.add(messageId); return n; });
+    } catch { /* silent */ }
+  }, [activeChatId, bookmarks]);
+
+  if (loading) {
+    return (
+      <main className="flex flex-col h-screen bg-[var(--wa-page-bg)] items-center justify-center">
+        <div className="w-10 h-10 border-3 border-[var(--wa-accent)] border-t-transparent rounded-full animate-spin" />
+      </main>
+    );
+  }
 
   return (
     <main className="flex flex-col h-screen bg-[var(--wa-page-bg)]">
-      {/* Top bar (desktop only) */}
       <div className="hidden md:block h-[127px] bg-[var(--wa-top-bar)] shrink-0" />
 
-      {/* Main container */}
       <div className="flex-1 flex flex-col md:relative md:-mt-[87px] md:mx-auto md:w-full md:max-w-[1600px] md:shadow-2xl md:rounded-t-sm overflow-hidden min-h-0">
-        {showUpload && !pendingText ? (
-          <div className="flex flex-col flex-1 bg-[var(--wa-bg)] overflow-y-auto">
-            <FileUpload onFileLoaded={handleFileLoaded} />
-            <div className="pb-4 text-center">
-              <button
-                onClick={loadSampleData}
-                className="text-sm text-[#00a884] hover:underline font-medium"
-              >
-                Or load sample chat data to explore
-              </button>
-            </div>
-
-            {/* Content section for AdSense compliance */}
-            <div className="max-w-2xl mx-auto px-6 pb-8 space-y-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-[#111b21] mb-3">WhatsApp Chat Viewer</h2>
-                <p className="text-sm text-[#667781] leading-relaxed mb-4">
-                  View your exported WhatsApp conversations in a beautiful, familiar interface. Upload a <code className="bg-[#f0f2f5] px-1 rounded text-[#111b21]">.txt</code> or <code className="bg-[#f0f2f5] px-1 rounded text-[#111b21]">.zip</code> file exported from WhatsApp and browse your messages with full search, filters, and media support.
-                </p>
-                <h3 className="text-sm font-semibold text-[#111b21] mb-2">Features</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  {[
-                    'WhatsApp-style chat bubbles with timestamps and read receipts',
-                    'Search messages and filter by sender or date range',
-                    'View photos, videos, and audio from .zip exports',
-                    '100% private \u2014 all processing happens in your browser',
-                    'Works with both individual and group chats',
-                    'Responsive design for mobile and desktop',
-                  ].map((f) => (
-                    <div key={f} className="flex items-start gap-2">
-                      <span className="text-[#00a884] mt-0.5">&#x2713;</span>
-                      <span className="text-[#667781]">{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="text-sm font-semibold text-[#111b21] mb-3">How to Export Your WhatsApp Chat</h3>
-                <ol className="text-sm text-[#667781] space-y-2 list-decimal list-inside">
-                  <li>Open the chat you want to export in WhatsApp</li>
-                  <li>Tap the <strong className="text-[#111b21]">three dots</strong> menu (top right)</li>
-                  <li>Select <strong className="text-[#111b21]">More</strong> &rarr; <strong className="text-[#111b21]">Export chat</strong></li>
-                  <li>Choose <strong className="text-[#111b21]">Include media</strong> for photos/videos, or <strong className="text-[#111b21]">Without media</strong> for text only</li>
-                  <li>Save the file and upload it here</li>
-                </ol>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="text-sm font-semibold text-[#111b21] mb-3">Supported Formats</h3>
-                <div className="text-sm text-[#667781] space-y-1">
-                  <p><code className="bg-[#f0f2f5] px-1 rounded text-[#111b21]">.txt</code> &mdash; Text-only export with placeholder icons for media.</p>
-                  <p><code className="bg-[#f0f2f5] px-1 rounded text-[#111b21]">.zip</code> &mdash; Full export with photos, videos, and audio displayed inline.</p>
-                  <p className="mt-2">Both <code className="bg-[#f0f2f5] px-1 rounded text-[#111b21]">DD/MM/YYYY</code> and <code className="bg-[#f0f2f5] px-1 rounded text-[#111b21]">[DD/MM/YY, HH:MM:SS]</code> formats supported.</p>
-                </div>
-              </div>
-
-              <div className="text-center flex justify-center gap-4 pb-4">
-                <a href="/privacy" className="text-xs text-[#667781] hover:text-[#00a884] hover:underline">Privacy Policy</a>
-                <span className="text-xs text-[#667781]">&middot;</span>
-                <a href="/terms" className="text-xs text-[#667781] hover:text-[#00a884] hover:underline">Terms of Service</a>
-              </div>
-            </div>
-          </div>
-        ) : chat ? (
-          <ErrorBoundary onReset={handleUploadClick}>
-            <ChatView chat={chat} onUploadClick={handleUploadClick} />
+        {chat ? (
+          <ErrorBoundary onReset={handleBackToList}>
+            <ChatView
+              chat={chat}
+              bookmarks={bookmarks}
+              onToggleBookmark={handleToggleBookmark}
+              onUploadClick={handleBackToList}
+              onBackToList={storedChats.length > 0 || dbAvailable ? handleBackToList : undefined}
+              initialSearchQuery={initialSearchQuery}
+            />
           </ErrorBoundary>
-        ) : null}
+        ) : pendingText ? null : (
+          <ChatList
+            chats={storedChats}
+            onLoadChat={handleLoadStoredChat}
+            onDeleteChat={handleDeleteChat}
+            onFileLoaded={handleFileLoaded}
+            onLoadSample={loadSampleData}
+          />
+        )}
       </div>
 
-      {/* Sender picker modal */}
       {pendingText && pendingParticipants.length > 0 && (
         <SenderPicker participants={pendingParticipants} onSelect={handleSenderSelected} />
       )}

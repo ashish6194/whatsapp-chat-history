@@ -4,15 +4,18 @@ import { memo } from 'react';
 import { Message } from '@/lib/types';
 import { formatTime, getParticipantColor } from '@/lib/utils';
 import MediaDisplay from './MediaDisplay';
+import BookmarkButton from './BookmarkButton';
 
 interface ChatBubbleProps {
   message: Message;
   isGroup: boolean;
   participants: string[];
   showSender: boolean;
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
 }
 
-const ChatBubble = memo(function ChatBubble({ message, isGroup, participants, showSender }: ChatBubbleProps) {
+const ChatBubble = memo(function ChatBubble({ message, isGroup, participants, showSender, isBookmarked = false, onToggleBookmark }: ChatBubbleProps) {
   if (message.type === 'system') {
     return (
       <div className="flex justify-center my-1" role="status">
@@ -28,7 +31,7 @@ const ChatBubble = memo(function ChatBubble({ message, isGroup, participants, sh
   return (
     <div className={`flex ${isOut ? 'justify-end' : 'justify-start'} mb-[2px] px-[5%] md:px-[8%]`} aria-label={`${message.sender}, ${formatTime(message.timestamp)}`}>
       <div
-        className={`relative rounded-lg shadow-sm ${
+        className={`group relative rounded-lg shadow-sm ${
           message.mediaUrl
             ? 'max-w-[280px] px-1 pt-1 pb-1'
             : 'max-w-[75%] md:max-w-[65%] px-2 py-1'
@@ -38,6 +41,13 @@ const ChatBubble = memo(function ChatBubble({ message, isGroup, participants, sh
             : 'bg-[var(--wa-bubble-in)] rounded-tl-none'
         }`}
       >
+        {/* Bookmark button */}
+        {onToggleBookmark && (
+          <div className="absolute -top-1 -right-1 z-10">
+            <BookmarkButton isBookmarked={isBookmarked} onToggle={onToggleBookmark} />
+          </div>
+        )}
+
         {/* Bubble tail */}
         <div
           className={`absolute top-0 w-2 h-3 ${

@@ -6,9 +6,10 @@ import AdBanner from './AdBanner';
 
 interface SidebarProps {
   chat: Chat;
+  bookmarkCount?: number;
 }
 
-export default function Sidebar({ chat }: SidebarProps) {
+export default function Sidebar({ chat, bookmarkCount = 0 }: SidebarProps) {
   const messageCounts = chat.participants.reduce<Record<string, number>>((acc, p) => {
     acc[p] = chat.messages.filter((m) => m.sender === p).length;
     return acc;
@@ -56,6 +57,10 @@ export default function Sidebar({ chat }: SidebarProps) {
           <div className="flex justify-between text-[var(--wa-text-primary)]">
             <span>Media messages</span>
             <span className="font-medium">{chat.messages.filter((m) => m.type === 'media').length}</span>
+          </div>
+          <div className="flex justify-between text-[var(--wa-text-primary)]">
+            <span>Bookmarked</span>
+            <span className="font-medium">{bookmarkCount}</span>
           </div>
         </div>
       </div>

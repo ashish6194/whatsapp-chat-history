@@ -12,6 +12,7 @@ const MEDIA_EXTENSIONS = new Set([
 export interface ZipResult {
   chatText: string;
   mediaMap: Map<string, string>;
+  mediaBlobMap: Map<string, Blob>;
 }
 
 function getExtension(filename: string): string {
@@ -25,6 +26,7 @@ function getBaseName(path: string): string {
 export async function extractWhatsAppZip(file: File): Promise<ZipResult> {
   const zip = await JSZip.loadAsync(file);
   const mediaMap = new Map<string, string>();
+  const mediaBlobMap = new Map<string, Blob>();
   let chatText = '';
 
   // Find the chat text file (_chat.txt or any root .txt file)
@@ -67,13 +69,14 @@ export async function extractWhatsAppZip(file: File): Promise<ZipResult> {
         if (blob.size > MAX_MEDIA_FILE_SIZE) return;
         const url = URL.createObjectURL(blob);
         mediaMap.set(baseName, url);
+        mediaBlobMap.set(baseName, blob);
       })
     );
   });
 
   await Promise.all(mediaPromises);
 
-  return { chatText, mediaMap };
+  return { chatText, mediaMap, mediaBlobMap };
 }
 
 export function revokeMediaUrls(mediaMap: Map<string, string>) {

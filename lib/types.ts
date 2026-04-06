@@ -14,10 +14,23 @@ export interface Message {
 }
 
 export interface Chat {
+  id?: string;
   name: string;
   participants: string[];
   messages: Message[];
   isGroup: boolean;
+}
+
+export interface ChatSummary {
+  id: string;
+  name: string;
+  participants: string[];
+  isGroup: boolean;
+  messageCount: number;
+  firstMessageDate: string;
+  lastMessageDate: string;
+  createdAt: string;
+  bookmarkCount: number;
 }
 
 export interface FilterState {
