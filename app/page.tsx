@@ -88,9 +88,17 @@ export default function Home() {
       const result = await loadChat(chatId);
       if (!result) { alert('Chat not found in storage.'); setLoading(false); return; }
       if (activeMediaMapRef.current) revokeMediaUrls(activeMediaMapRef.current);
-      const parsed = parseWhatsAppChat(result.rawText, result.outgoingSender, result.mediaMap);
+
+      // Try parsing with the stored sender, fall back to without sender
+      let parsed = parseWhatsAppChat(result.rawText, result.outgoingSender, result.mediaMap);
       if (parsed.messages.length === 0) {
-        alert('Failed to parse the stored chat. The chat data may be corrupted. Try re-uploading the file.');
+        // Retry without outgoing sender — maybe raw text format changed
+        parsed = parseWhatsAppChat(result.rawText, undefined, result.mediaMap);
+      }
+      if (parsed.messages.length === 0) {
+        // Debug: log the first 200 chars to help diagnose
+        console.error('Failed to parse stored chat. First 200 chars:', result.rawText.slice(0, 200));
+        alert('Could not parse this chat. The format may not be supported. Try deleting and re-uploading.');
         setLoading(false);
         return;
       }
