@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ChatSummary } from '@/lib/types';
 import { getInitials, getParticipantColor } from '@/lib/utils';
-import { searchAllChats, type GlobalSearchResult } from '@/lib/db';
+import { searchAllChats, addBookmark, removeBookmark, getBookmarks, type GlobalSearchResult } from '@/lib/db';
 import FileUpload from './FileUpload';
 import AdBanner from './AdBanner';
 
@@ -28,6 +28,7 @@ export default function ChatList({ chats, onLoadChat, onDeleteChat, onFileLoaded
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GlobalSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchBookmarks, setSearchBookmarks] = useState<Map<string, Set<string>>>(new Map()); // chatId -> Set<messageId>
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   useEffect(() => {
@@ -35,7 +36,17 @@ export default function ChatList({ chats, onLoadChat, onDeleteChat, onFileLoaded
     if (!searchQuery || searchQuery.length < 2) { setSearchResults([]); setSearching(false); return; }
     setSearching(true);
     debounceRef.current = setTimeout(() => {
-      searchAllChats(searchQuery).then((r) => { setSearchResults(r); setSearching(false); });
+      searchAllChats(searchQuery).then(async (r) => {
+        setSearchResults(r);
+        // Load bookmarks for all chats in results
+        const chatIds = [...new Set(r.map((x) => x.chatId))];
+        const bmMap = new Map<string, Set<string>>();
+        for (const cid of chatIds) {
+          try { bmMap.set(cid, await getBookmarks(cid)); } catch { /* ignore */ }
+        }
+        setSearchBookmarks(bmMap);
+        setSearching(false);
+      });
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [searchQuery]);
@@ -98,19 +109,49 @@ export default function ChatList({ chats, onLoadChat, onDeleteChat, onFileLoaded
           ) : (
             <div className="space-y-1.5">
               <p className="text-xs text-[var(--wa-text-secondary)] mb-2">{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</p>
-              {searchResults.map((r, i) => (
-                <button key={`${r.chatId}-${r.messageId}-${i}`} onClick={() => onLoadChat(r.chatId, searchQuery)}
-                  className="w-full bg-[var(--wa-sidebar-bg)] rounded-xl px-4 py-3 hover:bg-[var(--wa-input-bg)] transition-colors text-left border border-[var(--wa-border)]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-medium shrink-0" style={{ backgroundColor: getParticipantColor(r.chatName, r.participants) }} aria-hidden="true">{getInitials(r.chatName)}</div>
-                    <span className="text-xs font-medium text-[var(--wa-text-primary)]">{r.chatName}</span>
-                    <span className="text-[10px] text-[var(--wa-text-secondary)]">&middot;</span>
-                    <span className="text-xs font-medium" style={{ color: getParticipantColor(r.sender, r.participants) }}>{r.sender}</span>
-                    {r.timestamp && <span className="text-[10px] text-[var(--wa-text-secondary)] ml-auto">{r.timestamp}</span>}
+              {searchResults.map((r, i) => {
+                const isBookmarked = searchBookmarks.get(r.chatId)?.has(r.messageId) || false;
+                return (
+                  <div key={`${r.chatId}-${r.messageId}-${i}`} className="bg-[var(--wa-sidebar-bg)] rounded-xl border border-[var(--wa-border)] overflow-hidden flex">
+                    <button onClick={() => onLoadChat(r.chatId, searchQuery)}
+                      className="flex-1 px-4 py-3 hover:bg-[var(--wa-input-bg)] transition-colors text-left min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-medium shrink-0" style={{ backgroundColor: getParticipantColor(r.chatName, r.participants) }} aria-hidden="true">{getInitials(r.chatName)}</div>
+                        <span className="text-xs font-medium text-[var(--wa-text-primary)]">{r.chatName}</span>
+                        <span className="text-[10px] text-[var(--wa-text-secondary)]">&middot;</span>
+                        <span className="text-xs font-medium" style={{ color: getParticipantColor(r.sender, r.participants) }}>{r.sender}</span>
+                        {r.timestamp && <span className="text-[10px] text-[var(--wa-text-secondary)] ml-auto">{r.timestamp}</span>}
+                      </div>
+                      <p className="text-sm text-[var(--wa-text-primary)] truncate">{highlightMatch(r.content, searchQuery)}</p>
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          if (isBookmarked) {
+                            await removeBookmark(r.chatId, r.messageId);
+                          } else {
+                            await addBookmark(r.chatId, r.messageId);
+                          }
+                          setSearchBookmarks((prev) => {
+                            const next = new Map(prev);
+                            const set = new Set(next.get(r.chatId) || []);
+                            if (isBookmarked) set.delete(r.messageId); else set.add(r.messageId);
+                            next.set(r.chatId, set);
+                            return next;
+                          });
+                        } catch { /* silent */ }
+                      }}
+                      className="px-3 flex items-center hover:bg-[var(--wa-input-bg)] transition-colors border-l border-[var(--wa-border)]"
+                      aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark this message'}
+                    >
+                      <svg className={`w-5 h-5 ${isBookmarked ? 'text-[#f5c829]' : 'text-[var(--wa-text-secondary)] opacity-40 hover:opacity-100'}`} viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    </button>
                   </div>
-                  <p className="text-sm text-[var(--wa-text-primary)] truncate">{highlightMatch(r.content, searchQuery)}</p>
-                </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
