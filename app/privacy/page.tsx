@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
         <div className="max-w-3xl mx-auto">
           <Link href="/" className="text-white/80 text-sm hover:text-white">&larr; Back to Chat Viewer</Link>
           <h1 className="text-2xl font-semibold mt-2">Privacy Policy</h1>
-          <p className="text-white/70 text-sm mt-1">Last updated: March 29, 2025</p>
+          <p className="text-white/70 text-sm mt-1">Last updated: April 6, 2026</p>
         </div>
       </div>
 
@@ -22,13 +22,13 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold mb-2">Overview</h2>
             <p>
-              WhatsApp Chat Viewer is a client-side web application that allows you to view your exported WhatsApp chat history in a familiar interface. We are committed to protecting your privacy and being transparent about our data practices.
+              WhatsApp Chat Viewer is a client-side web application that allows you to view, search, analyze, and export your exported WhatsApp chat history. We are committed to protecting your privacy and being transparent about our data practices.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold mb-2">Data We Collect</h2>
-            <p className="font-medium text-[#00a884] mb-1">We do not collect, store, or transmit your chat data.</p>
+            <p className="font-medium text-[#00a884] mb-1">We do not collect, store, or transmit your chat data to any server.</p>
             <p>
               All processing happens entirely in your web browser. When you upload a WhatsApp export file (.txt or .zip), the file is parsed locally using JavaScript. Your chat messages, media files, and personal information never leave your device and are never sent to any server.
             </p>
@@ -39,10 +39,39 @@ export default function PrivacyPolicy() {
             <ul className="list-disc list-inside space-y-1">
               <li>Chat files are read and parsed entirely in your browser</li>
               <li>Media files from .zip exports are extracted locally and displayed using temporary browser URLs</li>
-              <li>All data is held in browser memory only and is discarded when you close or refresh the page</li>
-              <li>No data is stored in cookies, local storage, or any persistent storage</li>
+              <li>Chat data may be stored locally on your device using your browser&apos;s IndexedDB storage, allowing you to revisit conversations without re-uploading</li>
+              <li>Bookmarked messages are stored locally in IndexedDB on your device</li>
+              <li>You can delete any stored chat data at any time from within the app</li>
               <li>No data is sent to our servers or any third party</li>
             </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-2">Local Storage (IndexedDB)</h2>
+            <p>
+              To improve your experience, this app uses your browser&apos;s IndexedDB storage to save uploaded chats, media files, and bookmarks locally on your device. This data:
+            </p>
+            <ul className="list-disc list-inside space-y-1 mt-2">
+              <li>Is stored only on your device and never transmitted to any server</li>
+              <li>Persists across page reloads and browser sessions</li>
+              <li>Can be deleted at any time using the delete button next to each saved chat</li>
+              <li>Can be cleared entirely by clearing your browser&apos;s site data</li>
+              <li>Is not accessible to other websites or applications</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-2">PDF Export</h2>
+            <p>
+              The PDF export feature generates a PDF file entirely in your browser using the jsPDF library. The generated PDF is downloaded directly to your device and is never uploaded to any server.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-2">Chat Analytics</h2>
+            <p>
+              The chat analytics feature computes statistics such as message counts, activity patterns, and emoji usage entirely in your browser. No analytics data is sent to any server or third party.
+            </p>
           </section>
 
           <section>

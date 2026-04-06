@@ -12,7 +12,7 @@ export default function TermsOfService() {
         <div className="max-w-3xl mx-auto">
           <Link href="/" className="text-white/80 text-sm hover:text-white">&larr; Back to Chat Viewer</Link>
           <h1 className="text-2xl font-semibold mt-2">Terms of Service</h1>
-          <p className="text-white/70 text-sm mt-1">Last updated: March 29, 2025</p>
+          <p className="text-white/70 text-sm mt-1">Last updated: April 6, 2026</p>
         </div>
       </div>
 
@@ -29,8 +29,21 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-semibold mb-2">Description of Service</h2>
             <p>
-              WhatsApp Chat Viewer is a free, client-side web application that allows you to view exported WhatsApp chat history files in a visual interface. The service processes files entirely in your browser and does not store or transmit your data.
+              WhatsApp Chat Viewer is a free, client-side web application that allows you to view, search, bookmark, analyze, and export your WhatsApp chat history. The service processes files entirely in your browser. Chat data may be stored locally on your device using IndexedDB for convenience, but is never transmitted to any server.
             </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-2">Features</h2>
+            <ul className="list-disc list-inside space-y-1">
+              <li><strong>Chat Viewer</strong> &mdash; upload and view WhatsApp exported .txt or .zip files with a familiar chat interface</li>
+              <li><strong>Search &amp; Filter</strong> &mdash; search messages by text, filter by sender or date range</li>
+              <li><strong>Media Display</strong> &mdash; view photos, videos, and audio from .zip exports inline</li>
+              <li><strong>Bookmarks</strong> &mdash; bookmark important messages for quick access later</li>
+              <li><strong>Chat Analytics</strong> &mdash; view statistics including message counts, activity patterns, top emojis, and more</li>
+              <li><strong>PDF Export</strong> &mdash; download your chat as a styled PDF document</li>
+              <li><strong>Local Storage</strong> &mdash; save chats to your browser for revisiting without re-uploading</li>
+            </ul>
           </section>
 
           <section>
@@ -40,7 +53,22 @@ export default function TermsOfService() {
               <li>You must have the right to access the chat history you upload</li>
               <li>You should not upload files containing illegal content</li>
               <li>You are responsible for maintaining the privacy of your chat data</li>
+              <li>You are responsible for managing locally stored data on your device</li>
             </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-2">Local Data Storage</h2>
+            <p>
+              This application may store your uploaded chat data, media files, and bookmarks in your browser&apos;s IndexedDB storage. This data is stored only on your device, is not accessible to us or any third party, and can be deleted at any time from within the app or by clearing your browser&apos;s site data.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-2">PDF Export</h2>
+            <p>
+              The PDF export feature generates documents entirely in your browser. Generated PDFs are downloaded directly to your device. We are not responsible for the content of exported PDFs, which is derived from the chat data you provide.
+            </p>
           </section>
 
           <section>
@@ -53,14 +81,14 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-semibold mb-2">Disclaimer of Warranties</h2>
             <p>
-              This service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, either express or implied. We do not guarantee that the service will be uninterrupted, error-free, or that it will correctly parse all WhatsApp export formats.
+              This service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, either express or implied. We do not guarantee that the service will be uninterrupted, error-free, or that it will correctly parse all WhatsApp export formats. Chat analytics and statistics are provided for informational purposes only and may not be fully accurate.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold mb-2">Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, we shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use this service.
+              To the fullest extent permitted by law, we shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use this service, including but not limited to loss of data, inaccurate analytics, or issues with exported PDF files.
             </p>
           </section>
 
