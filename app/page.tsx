@@ -86,9 +86,14 @@ export default function Home() {
     setLoading(true);
     try {
       const result = await loadChat(chatId);
-      if (!result) { setLoading(false); return; }
+      if (!result) { alert('Chat not found in storage.'); setLoading(false); return; }
       if (activeMediaMapRef.current) revokeMediaUrls(activeMediaMapRef.current);
       const parsed = parseWhatsAppChat(result.rawText, result.outgoingSender, result.mediaMap);
+      if (parsed.messages.length === 0) {
+        alert('Failed to parse the stored chat. The chat data may be corrupted. Try re-uploading the file.');
+        setLoading(false);
+        return;
+      }
       parsed.id = chatId;
       setBookmarks(await getBookmarks(chatId));
       setChat(parsed);
