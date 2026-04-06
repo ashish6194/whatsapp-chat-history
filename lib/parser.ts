@@ -1,14 +1,21 @@
 import { Chat, Message, MessageType, MediaType } from './types';
 
-// Format 1: [DD/MM/YY, HH:MM:SS] Sender: Message
-const FORMAT_1 = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s(.+?):\s([\s\S]*)$/;
+// Unicode markers WhatsApp inserts (LTR mark, RTL mark, NBSP, zero-width space)
+const U = '[\\u200E\\u200F\\u202A-\\u202E\\u00A0\\u200B]*';
+// Date: DD/MM/YY or DD/MM/YYYY or DD.MM.YYYY
+const DATE = '(\\d{1,2}[/.]\\d{1,2}[/.]\\d{2,4})';
+// Time: HH:MM or HH:MM:SS, optionally AM/PM
+const TIME = '(\\d{1,2}:\\d{2}(?::\\d{2})?(?:\\s?[APap][Mm])?)';
 
-// Format 2: DD/MM/YYYY, HH:MM - Sender: Message
-const FORMAT_2 = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?:\s?[APap][Mm])?)\s-\s(.+?):\s([\s\S]*)$/;
+// Format 1: [DD/MM/YY, HH:MM:SS AM] Sender: Message
+const FORMAT_1 = new RegExp(`^${U}\\[${U}${DATE},\\s${TIME}${U}\\]\\s(.+?):\\s([\\s\\S]*)$`);
+
+// Format 2: DD/MM/YYYY, HH:MM AM - Sender: Message
+const FORMAT_2 = new RegExp(`^${U}${DATE},\\s${TIME}${U}\\s?[-\u2013]\\s?(.+?):\\s([\\s\\S]*)$`);
 
 // System message formats (no sender)
-const SYSTEM_FORMAT_1 = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s(.+)$/;
-const SYSTEM_FORMAT_2 = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?:\s?[APap][Mm])?)\s-\s(.+)$/;
+const SYSTEM_FORMAT_1 = new RegExp(`^${U}\\[${U}${DATE},\\s${TIME}${U}\\]\\s(.+)$`);
+const SYSTEM_FORMAT_2 = new RegExp(`^${U}${DATE},\\s${TIME}${U}\\s?[-\u2013]\\s?(.+)$`);
 
 const MEDIA_PATTERNS: { pattern: RegExp; type: MediaType }[] = [
   { pattern: /<Media omitted>/i, type: 'unknown' },
@@ -44,7 +51,7 @@ const SYSTEM_KEYWORDS = [
 ];
 
 function parseDate(dateStr: string, timeStr: string): Date | null {
-  const parts = dateStr.split('/');
+  const parts = dateStr.split(/[/.]/);
   if (parts.length !== 3) return null;
 
   const day = parseInt(parts[0], 10);
