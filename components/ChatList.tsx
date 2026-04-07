@@ -53,11 +53,40 @@ export default function ChatList({ chats, onLoadChat, onDeleteChat, onFileLoaded
 
   if (chats.length === 0) {
     return (
-      <div className="flex flex-col flex-1">
-        <AdBanner format="horizontal" slot="7984254267" className="bg-[var(--wa-bg)] pt-4 px-4" />
+      <div className="flex flex-col flex-1 bg-[var(--wa-bg)] overflow-y-auto">
         <FileUpload onFileLoaded={onFileLoaded} />
-        <div className="bg-[var(--wa-bg)] pb-4 text-center">
+        <div className="pb-4 text-center">
           <button onClick={onLoadSample} className="text-sm text-[var(--wa-accent)] hover:underline font-medium">Or load sample chat data to explore</button>
+        </div>
+
+        {/* Privacy & security notice */}
+        <div className="max-w-lg mx-auto px-6 pb-6">
+          <div className="bg-[var(--wa-sidebar-bg)] rounded-xl p-5 shadow-sm border border-[var(--wa-border)]">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-5 h-5 text-[var(--wa-accent)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <h3 className="text-sm font-semibold text-[var(--wa-text-primary)]">Your chats are 100% private</h3>
+            </div>
+            <ul className="text-xs text-[var(--wa-text-secondary)] space-y-1.5">
+              <li className="flex items-start gap-1.5">
+                <span className="text-[var(--wa-accent)] mt-0.5">&#x2713;</span>
+                <span>All processing happens in your browser &mdash; nothing is sent to any server</span>
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="text-[var(--wa-accent)] mt-0.5">&#x2713;</span>
+                <span>Saved chats are stored only on your device and cannot be accessed by anyone else</span>
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="text-[var(--wa-accent)] mt-0.5">&#x2713;</span>
+                <span>No accounts, no tracking, no data collection</span>
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="text-[var(--wa-accent)] mt-0.5">&#x2713;</span>
+                <span>You can delete any stored chat at any time</span>
+              </li>
+            </ul>
+          </div>
         </div>
         <AdBanner format="horizontal" slot="7984254267" className="bg-[var(--wa-bg)] pb-4 px-4" />
         <div className="bg-[var(--wa-bg)] pb-6 text-center flex justify-center gap-4">
