@@ -28,7 +28,7 @@ export default function BookmarksPanel({ messages, bookmarks, participants, onSc
       </div>
 
       {bookmarkedMessages.length === 0 ? (
-        <div className="px-4 py-6 text-center">
+        <div className="px-4 py-6 text-center" role="status">
           <p className="text-sm text-[var(--wa-text-secondary)]">No bookmarked messages yet</p>
           <p className="text-xs text-[var(--wa-text-secondary)] mt-1">Hover over a message and click the star to bookmark it</p>
         </div>

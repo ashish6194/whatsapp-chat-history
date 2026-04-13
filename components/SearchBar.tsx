@@ -79,6 +79,7 @@ export default function SearchBar({
         />
         <button
           onClick={() => onFilterChange({ ...filters, mediaOnly: !filters.mediaOnly })}
+          title="Show only messages with media (photos, videos, audio)"
           className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
             filters.mediaOnly ? 'bg-[var(--wa-accent)] text-white' : 'bg-[var(--wa-input-bg)] text-[var(--wa-text-secondary)] hover:opacity-80'
           }`}
@@ -87,6 +88,7 @@ export default function SearchBar({
         </button>
         <button
           onClick={() => onFilterChange({ ...filters, hideSystemMessages: !filters.hideSystemMessages })}
+          title="Hide system messages (encryption notices, group changes)"
           className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
             filters.hideSystemMessages ? 'bg-[var(--wa-accent)] text-white' : 'bg-[var(--wa-input-bg)] text-[var(--wa-text-secondary)] hover:opacity-80'
           }`}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Chat } from '@/lib/types';
 import { getInitials, getParticipantColor } from '@/lib/utils';
 import AdBanner from './AdBanner';
@@ -10,10 +11,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ chat, bookmarkCount = 0 }: SidebarProps) {
-  const messageCounts = chat.participants.reduce<Record<string, number>>((acc, p) => {
+  const messageCounts = useMemo(() => chat.participants.reduce<Record<string, number>>((acc, p) => {
     acc[p] = chat.messages.filter((m) => m.sender === p).length;
     return acc;
-  }, {});
+  }, {}), [chat.participants, chat.messages]);
 
   const firstDate = chat.messages[0]?.timestamp;
   const lastDate = chat.messages[chat.messages.length - 1]?.timestamp;
@@ -21,7 +22,7 @@ export default function Sidebar({ chat, bookmarkCount = 0 }: SidebarProps) {
   return (
     <aside className="hidden lg:flex flex-col w-[320px] bg-[var(--wa-sidebar-bg)] border-l border-[var(--wa-border)] shrink-0" role="complementary" aria-label="Chat information">
       {/* Header */}
-      <div className="bg-[#f0f2f5] px-6 py-4 border-b border-[var(--wa-border)]">
+      <div className="bg-[var(--wa-input-bg)] px-6 py-4 border-b border-[var(--wa-border)]">
         <h2 className="text-[var(--wa-text-primary)] font-medium">Chat Info</h2>
       </div>
 

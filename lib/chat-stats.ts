@@ -119,7 +119,8 @@ export function computeChatStats(chat: Chat): ChatStatistics {
     : { date: '', count: 0 };
 
   // Most active hour
-  const maxHourIdx = hourlyActivity.indexOf(Math.max(...hourlyActivity));
+  const maxHourVal = Math.max(...hourlyActivity);
+  const maxHourIdx = maxHourVal > 0 ? hourlyActivity.indexOf(maxHourVal) : -1;
 
   return {
     totalMessages: messages.length,
@@ -147,7 +148,7 @@ export function computeChatStats(chat: Chat): ChatStatistics {
     mediaPerType,
     avgMessageLength,
     mostActiveDay,
-    mostActiveHour: { hour: maxHourIdx, count: hourlyActivity[maxHourIdx] || 0 },
+    mostActiveHour: { hour: maxHourIdx >= 0 ? maxHourIdx : 0, count: maxHourIdx >= 0 ? hourlyActivity[maxHourIdx] : 0 },
   };
 }
 

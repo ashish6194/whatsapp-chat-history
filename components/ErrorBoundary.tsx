@@ -29,11 +29,11 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex-1 flex items-center justify-center bg-[#eae6df] p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-sm text-center shadow-lg">
+        <div className="flex-1 flex items-center justify-center bg-[var(--wa-bg)] p-4">
+          <div className="bg-[var(--wa-sidebar-bg)] rounded-2xl p-8 max-w-sm text-center shadow-lg">
             <div className="text-4xl mb-4">&#x26A0;&#xFE0F;</div>
-            <h2 className="text-lg font-medium text-[#111b21] mb-2">Something went wrong</h2>
-            <p className="text-sm text-[#667781] mb-6">
+            <h2 className="text-lg font-medium text-[var(--wa-text-primary)] mb-2">Something went wrong</h2>
+            <p className="text-sm text-[var(--wa-text-secondary)] mb-6">
               The chat viewer encountered an error. This might happen with unsupported file formats.
             </p>
             <button

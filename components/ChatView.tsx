@@ -139,7 +139,8 @@ export default function ChatView({ chat, bookmarks, onToggleBookmark, onUploadCl
     if (rows.length > 0 && listRef.current) {
       listRef.current.scrollToRow({ index: rows.length - 1, align: 'end' });
     }
-  }, [chat, rows.length, listRef]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only scroll on chat change, not filter/search
+  }, [chat.id, listRef]);
 
   const getItemSize = useCallback(
     (index: number) => getRowHeight(rows[index]),
